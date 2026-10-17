@@ -139,6 +139,7 @@
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "~13.0.0",
     "babel-preset-react-native": "^4.0.1",
+    "eas-cli": "^25.0.0",
     "eslint": "^8.56.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.22.1",
