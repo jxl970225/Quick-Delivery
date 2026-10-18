@@ -27,10 +27,10 @@ const MULTI_ENV_CONFIG = {
     CLARITY_ENABLED: true
   },
   production: {
-    GRAPHQL_URL: 'https://aws-server-v2.enatega.com/graphql',
-    WS_GRAPHQL_URL: 'wss://aws-server-v2.enatega.com/graphql',
-    SERVER_URL: 'https://aws-server-v2.enatega.com/graphql',
-    SERVER_REST_URL: 'https://aws-server-v2.enatega.com/',
+    GRAPHQL_URL: 'https://quick-delivery-production.up.railway.app/graphql',
+    WS_GRAPHQL_URL: 'wss://quick-delivery-production.up.railway.app/graphql',
+    SERVER_URL: 'https://quick-delivery-production.up.railway.app/graphql',
+    SERVER_REST_URL: 'https://quick-delivery-production.up.railway.app/',
     // GRAPHQL_URL: 'https://backup-server.enatega.com/graphql',
     // WS_GRAPHQL_URL: 'wss://backup-server.enatega.com/graphql',
     // SERVER_URL: 'https://backup-server.enatega.com/graphql',
@@ -43,10 +43,10 @@ const MULTI_ENV_CONFIG = {
   }
 }
 
-// Single-vendor production backend. Environment variables can still override
-// it for local or staging builds when needed.
+// Single-vendor backend now points to our own self-built Railway backend so
+// that login and every other request hit the same server we control.
 const SINGLE_VENDOR_DEFAULT_HOST =
-  'enatega-multivendor-api-production-9b09.up.railway.app'
+  'quick-delivery-production.up.railway.app'
 
 const getSingleVendorConfig = () => {
   const graphqlUrl = process.env.EXPO_PUBLIC_SINGLE_VENDOR_GRAPHQL_URL
