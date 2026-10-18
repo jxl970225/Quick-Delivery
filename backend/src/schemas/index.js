@@ -20,6 +20,7 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
+    metricsGeneral: MetricsGeneral
     login(email: String, password: String, type: String!, appleId: String, appleNonce: String, idToken: String, name: String, notificationToken: String): AuthPayload
     createUser(userInput: UserInput!): AuthPayload
     emailExist(email: String!): Boolean
@@ -261,6 +262,19 @@ const typeDefs = `#graphql
 
   type ShopTypesPayload {
     data: [ShopType]
+  }
+
+  type MetricsGeneral {
+    excellence: String
+    topgun: String
+    experience: String
+    skydiver: String
+    rider: String
+    haha: String
+    hehe: String
+    huhu: String
+    yoyo: String
+    turu: String
   }
 
   type Category {

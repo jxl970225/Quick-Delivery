@@ -52,6 +52,24 @@ const configResolvers = {
       // MVP：返回默认小费配置
       return [{ _id: 'default-tip', tipVariations: [5, 10, 15], enabled: true }]
     }
+  },
+  Mutation: {
+    metricsGeneral: async () => {
+      // 前端 publicAccess 用它生成公网访问 token（experience）+ 过期时间（hehe）。
+      // 返回有效 token + 很远的未来过期，避免前端 token 刷新逻辑报错。
+      return {
+        excellence: '',
+        topgun: '',
+        experience: `pub-token-${Date.now()}`,
+        skydiver: '',
+        rider: '',
+        haha: '',
+        hehe: '2999-01-01T00:00:00.000Z',
+        huhu: '',
+        yoyo: '',
+        turu: ''
+      }
+    }
   }
 }
 
