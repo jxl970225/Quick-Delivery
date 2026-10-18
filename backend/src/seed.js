@@ -31,6 +31,17 @@ async function seed() {
     isNewUser: false
   })
 
+  // SINGLE vendor 演示账号（与前端 singleVendorCustomerDemo 一致）
+  await User.deleteMany({ email: 'customer@fresh.com' })
+  await User.create({
+    name: 'Fresh Customer',
+    email: 'customer@fresh.com',
+    password: 'Customer@12345',
+    phone: '+15559876543',
+    emailIsVerified: true,
+    isNewUser: false
+  })
+
   // 优惠券
   await Coupon.deleteMany({})
   await Coupon.create([
