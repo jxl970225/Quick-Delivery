@@ -23,6 +23,11 @@ const userResolvers = {
       const userId = getUserFromContext(context)
       if (!userId) return null
       return User.findById(userId)
+    },
+    profile: async (_, __, context) => {
+      const userId = getUserFromContext(context)
+      if (!userId) return null
+      return User.findById(userId)
     }
   },
 

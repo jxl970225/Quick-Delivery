@@ -17,6 +17,7 @@ const typeDefs = `#graphql
     tips: [Tip]
     userFavourite(latitude: Float, longitude: Float): [Restaurant]
     user: User
+    profile: User
     singleVendorDiscovery(previewLimit: Int, dealLimit: Int): SingleVendorDiscovery
   }
 
@@ -114,6 +115,9 @@ const typeDefs = `#graphql
     isActive: Boolean
     isNewUser: Boolean
     notificationToken: String
+    isOrderNotification: Boolean
+    isOfferNotification: Boolean
+    favourite: [ID]
     addresses: [Address]
   }
 
