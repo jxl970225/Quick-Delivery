@@ -17,6 +17,7 @@ const typeDefs = `#graphql
     tips: [Tip]
     userFavourite(latitude: Float, longitude: Float): [Restaurant]
     user: User
+    singleVendorDiscovery(previewLimit: Int, dealLimit: Int): SingleVendorDiscovery
   }
 
   type Mutation {
@@ -454,6 +455,68 @@ const typeDefs = `#graphql
     order: String!
     rating: Int!
     description: String
+  }
+
+  type SingleDeal {
+    id: String
+    discountType: String
+    discountValue: Float
+    isActive: Boolean
+  }
+
+  type SingleVariation {
+    id: String
+    title: String
+    price: Float
+    isOutOfStock: Boolean
+    deal: SingleDeal
+  }
+
+  type HomeFoodItem {
+    id: String
+    categoryId: String
+    title: String
+    description: String
+    image: String
+    isOutOfStock: Boolean
+    variations: [SingleVariation]
+  }
+
+  type CategoryProduct {
+    id: String
+    categoryId: String
+    title: String
+    description: String
+    image: String
+    isOutOfStock: Boolean
+    variations: [SingleVariation]
+  }
+
+  type DiscoveryCategory {
+    id: String
+    name: String
+    icon: String
+    image: String
+    description: String
+    itemCount: Int
+    viewType: String
+    items: [HomeFoodItem]
+  }
+
+  type DealBlock {
+    items: [CategoryProduct]
+  }
+
+  type DiscoveryDeals {
+    limitedTime: DealBlock
+    weekly: DealBlock
+    newOffers: DealBlock
+  }
+
+  type SingleVendorDiscovery {
+    banners: [Banner]
+    categories: [DiscoveryCategory]
+    deals: DiscoveryDeals
   }
 `
 
