@@ -72,6 +72,7 @@ export const useCreateAccount = () => {
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: EXPO_CLIENT_ID,
+    webClientId: EXPO_CLIENT_ID || 'enatega-web-client-id',
     androidClientId: ANDROID_CLIENT_ID_GOOGLE,
     iosClientId: IOS_CLIENT_ID_GOOGLE,
     scopes: ['profile', 'email', 'openid']
