@@ -33,6 +33,16 @@ const configResolvers = {
       }
     },
 
+    banners: async () => {
+      // MVP：暂无 banner
+      return []
+    },
+
+    fetchAllShopTypes: async () => {
+      // MVP：暂无 shop type 分类
+      return { data: [] }
+    },
+
     taxes: async () => {
       // MVP：返回默认税费配置
       return [{ _id: 'default-tax', taxationCharges: 0, enabled: false }]

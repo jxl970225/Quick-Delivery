@@ -4,6 +4,8 @@ const typeDefs = `#graphql
     cuisines: [Cuisine]
     zones: [Zone]
     getVersions: Versions
+    banners: [Banner]
+    fetchAllShopTypes: ShopTypesPayload
     nearByRestaurants(latitude: Float, longitude: Float, shopType: String): NearByRestaurants
     nearByRestaurantsPreview(latitude: Float, longitude: Float, shopType: String, page: Int, limit: Int): NearByRestaurantsPreview
     restaurant(id: String): Restaurant
@@ -238,6 +240,27 @@ const typeDefs = `#graphql
     customerAppVersion: AppVersion
     riderAppVersion: AppVersion
     restaurantAppVersion: AppVersion
+  }
+
+  type Banner {
+    _id: ID
+    title: String
+    description: String
+    action: String
+    screen: String
+    file: String
+    parameters: String
+  }
+
+  type ShopType {
+    _id: ID
+    image: String
+    name: String
+    slug: String
+  }
+
+  type ShopTypesPayload {
+    data: [ShopType]
   }
 
   type Category {
