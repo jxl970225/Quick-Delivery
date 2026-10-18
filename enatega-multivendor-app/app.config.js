@@ -148,6 +148,8 @@ module.exports = () => {
       }
     },
     plugins: [
+      '@react-native-community/datetimepicker',
+      '@sentry/react-native',
       [
         'expo-splash-screen',
         {
