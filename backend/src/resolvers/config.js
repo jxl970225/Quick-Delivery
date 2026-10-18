@@ -23,6 +23,16 @@ const configResolvers = {
       return Cuisine.find()
     },
 
+    getVersions: async () => {
+      // 与 app.config.js 当前版本一致，避免前端强制更新弹窗
+      const v = { android: '1.1.42', ios: '1.1.42' }
+      return {
+        customerAppVersion: v,
+        riderAppVersion: v,
+        restaurantAppVersion: v
+      }
+    },
+
     taxes: async () => {
       // MVP：返回默认税费配置
       return [{ _id: 'default-tax', taxationCharges: 0, enabled: false }]

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useMemo, useContext } from 'react'
+import { Platform } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import gql from 'graphql-tag'
 import { useQuery } from '@apollo/client'
@@ -114,7 +115,19 @@ export const LocationProvider = ({ children }) => {
         if (storedLocation) {
           setLocation(storedLocation)
         } else {
-          setLocation(null)
+          // On web there is no device location and the city picker gate is
+          // painful to pass; default to New York so the app can proceed.
+          setLocation(
+            Platform.OS === 'web'
+              ? {
+                  label: 'New York',
+                  deliveryAddress: 'New York, NY, USA',
+                  latitude: 40.7128,
+                  longitude: -74.006,
+                  city: 'New York'
+                }
+              : null
+          )
         }
       } catch (err) {
         console.log(err)

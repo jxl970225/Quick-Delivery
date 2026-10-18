@@ -3,6 +3,7 @@ const typeDefs = `#graphql
     configuration: Configuration
     cuisines: [Cuisine]
     zones: [Zone]
+    getVersions: Versions
     nearByRestaurants(latitude: Float, longitude: Float, shopType: String): NearByRestaurants
     nearByRestaurantsPreview(latitude: Float, longitude: Float, shopType: String, page: Int, limit: Int): NearByRestaurantsPreview
     restaurant(id: String): Restaurant
@@ -226,6 +227,17 @@ const typeDefs = `#graphql
   type Location {
     type: String
     coordinates: [Float]
+  }
+
+  type AppVersion {
+    android: String
+    ios: String
+  }
+
+  type Versions {
+    customerAppVersion: AppVersion
+    riderAppVersion: AppVersion
+    restaurantAppVersion: AppVersion
   }
 
   type Category {
