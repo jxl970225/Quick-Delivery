@@ -1,7 +1,11 @@
 const Restaurant = require('../models/Restaurant')
+const Zone = require('../models/Zone')
 
 const restaurantResolvers = {
   Query: {
+    zones: async () => {
+      return await Zone.find({ isActive: true })
+    },
     nearByRestaurants: async (_, { latitude, longitude, shopType }) => {
       const query = {}
       if (shopType) query.shopType = shopType

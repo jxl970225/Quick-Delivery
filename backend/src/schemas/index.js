@@ -2,6 +2,7 @@ const typeDefs = `#graphql
   type Query {
     configuration: Configuration
     cuisines: [Cuisine]
+    zones: [Zone]
     nearByRestaurants(latitude: Float, longitude: Float, shopType: String): NearByRestaurants
     nearByRestaurantsPreview(latitude: Float, longitude: Float, shopType: String, page: Int, limit: Int): NearByRestaurantsPreview
     restaurant(id: String): Restaurant
@@ -216,7 +217,15 @@ const typeDefs = `#graphql
   type Zone {
     _id: ID
     title: String
+    description: String
     tax: Float
+    location: Location
+    isActive: Boolean
+  }
+
+  type Location {
+    type: String
+    coordinates: [Float]
   }
 
   type Category {

@@ -1,3 +1,5 @@
+// xcode: set sdk=iOS
+
 import ActivityKit
 
 public struct DeliveryAttributes: ActivityAttributes {

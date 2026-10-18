@@ -64,6 +64,7 @@ import { StripeProvider } from '@stripe/stripe-react-native'
 import ConfigurationContext from '../../context/Configuration'
 import SingleVendorPaymentCheckout from '../screens/Checkout/SingleVendorPaymentCheckout'
 import * as Notifications from 'expo-notifications'
+import { useSafeLastNotificationResponse } from '../../utils/useSafeLastNotificationResponse'
 import { APP_MODES } from '../../mode/constants'
 import {
   consumePendingOrderNavigation,
@@ -201,7 +202,7 @@ function MainNavigator() {
 }
 
 function SingleVendorAppContainer() {
-  const lastNotificationResponse = Notifications.useLastNotificationResponse()
+  const lastNotificationResponse = useSafeLastNotificationResponse()
   const handleNotification = useCallback(async response => {
     const data = response.notification.request.content.data
     const notificationMode = await inferNotificationMode(data)

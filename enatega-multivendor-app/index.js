@@ -1,5 +1,6 @@
 // import 'expo-dev-client'
 
+import './src/geolocationWebMock'
 import 'react-native-gesture-handler'
 import { registerRootComponent } from 'expo'
 import { registerLiveActivityBackgroundHandler } from './src/utils/liveActivityMessaging'

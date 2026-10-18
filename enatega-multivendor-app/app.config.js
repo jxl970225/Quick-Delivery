@@ -42,7 +42,10 @@ module.exports = () => {
     // Native OS splash (before JS boots) is theme-aware via the
     // expo-splash-screen plugin below — a solid per-theme background that
     // matches AnimatedSplash's first frame, so there is no black/white flash.
-    platforms: ['ios', 'android'],
+    platforms: ['ios', 'android', 'web'],
+    web: {
+      bundler: 'metro'
+    },
     orientation: 'portrait',
     icon: './assets/icon.png',
     assetBundlePatterns: ['**/*'],

@@ -5,6 +5,7 @@ const Restaurant = require('./models/Restaurant')
 const Coupon = require('./models/Coupon')
 const Cuisine = require('./models/Cuisine')
 const Configuration = require('./models/Configuration')
+const Zone = require('./models/Zone')
 
 async function seed() {
   await connectDB()
@@ -147,6 +148,18 @@ async function seed() {
   ]
 
   await Restaurant.create(restaurantData)
+
+  // 配送区域（zones）—— 前端将 zones 展示为城市列表
+  await Zone.deleteMany({})
+  await Zone.create([
+    {
+      title: 'New York',
+      description: 'Greater New York delivery area',
+      location: { type: 'Point', coordinates: [-74.006, 40.7128] },
+      isActive: true,
+      tax: 8.875
+    }
+  ])
 
   console.log('✅ Seed 完成：测试账号 test@example.com / password123')
   process.exit(0)
