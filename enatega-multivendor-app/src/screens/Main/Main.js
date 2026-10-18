@@ -511,7 +511,6 @@ function Main(props) {
   )
 
   const userFriendlyErrorMessage = getErrorMessage(error)
-  if (error) console.log('MAIN_ERR_DETAIL', JSON.stringify(error))
   // Keep the loading UI up while a transient failure is being auto-retried so
   // the user never sees the full-screen "something went wrong" for a blip.
   const isAutoRetrying = !!error && isTransientNetworkError && !retriesExhausted

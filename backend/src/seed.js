@@ -66,6 +66,15 @@ async function seed() {
       isAvailable: true,
       rating: 4.5,
       reviewCount: 120,
+      openingTimes: [
+        { day: 'SUN', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'MON', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'TUE', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'WED', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'THU', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'FRI', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'SAT', times: [{ startTime: [0, 0], endTime: [23, 59] }] }
+      ],
       reviewAverage: 4.5,
       categories: [
         {
@@ -120,6 +129,15 @@ async function seed() {
       isAvailable: true,
       rating: 4.8,
       reviewCount: 200,
+      openingTimes: [
+        { day: 'SUN', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'MON', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'TUE', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'WED', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'THU', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'FRI', times: [{ startTime: [0, 0], endTime: [23, 59] }] },
+        { day: 'SAT', times: [{ startTime: [0, 0], endTime: [23, 59] }] }
+      ],
       reviewAverage: 4.8,
       categories: [
         {

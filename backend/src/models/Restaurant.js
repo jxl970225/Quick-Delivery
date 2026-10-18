@@ -4,8 +4,8 @@ const openingTimesSchema = new mongoose.Schema({
   day: String,
   times: [
     {
-      startTime: String,
-      endTime: String
+      startTime: [Number],
+      endTime: [Number]
     }
   ]
 })

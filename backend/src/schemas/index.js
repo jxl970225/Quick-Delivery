@@ -323,8 +323,8 @@ const typeDefs = `#graphql
   }
 
   type OpenTime {
-    startTime: String
-    endTime: String
+    startTime: [Float]
+    endTime: [Float]
   }
 
   type Order {
