@@ -31,6 +31,12 @@ defaultConfig.resolver.resolveRequest = (context, moduleName, platform) => {
       type: 'sourceFile'
     }
   }
+  if (platform === 'web' && moduleName === 'expo-secure-store') {
+    return {
+      filePath: path.join(__dirname, 'src', 'secureStoreWebMock.js'),
+      type: 'sourceFile'
+    }
+  }
   if (baseResolveRequest) {
     return baseResolveRequest(context, moduleName, platform)
   }
