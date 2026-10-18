@@ -307,7 +307,7 @@ export const addFavouriteRestaurant = `mutation AddFavourite($id:String!){
 
 export const emailExist = `
   mutation EmailExist($email: String!) {
-    emailExist(email: $email)
+    emailExist(email: $email) { _id }
   }`
 
 export const phoneExist = `
