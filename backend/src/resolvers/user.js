@@ -70,7 +70,7 @@ const userResolvers = {
 
     emailExist: async (_, { email }) => {
       const user = await User.findOne({ email: email.toLowerCase() })
-      return !!user
+      return user
     },
 
     phoneExist: async (_, { phone }) => {

@@ -23,7 +23,7 @@ const typeDefs = `#graphql
     metricsGeneral: MetricsGeneral
     login(email: String, password: String, type: String!, appleId: String, appleNonce: String, idToken: String, name: String, notificationToken: String): AuthPayload
     createUser(userInput: UserInput!): AuthPayload
-    emailExist(email: String!): Boolean
+    emailExist(email: String!): User
     phoneExist(phone: String!): Boolean
     sendOtpToEmail(email: String!): OTPResult
     sendOtpToPhoneNumber(phone: String!): OTPResult
