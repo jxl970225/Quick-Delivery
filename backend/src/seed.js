@@ -52,9 +52,9 @@ async function seed() {
   // 菜系
   await Cuisine.deleteMany({})
   await Cuisine.create([
-    { name: 'American', image: 'https://placehold.co/200', shopType: 'restaurant' },
-    { name: 'Italian', image: 'https://placehold.co/200', shopType: 'restaurant' },
-    { name: 'Sushi', image: 'https://placehold.co/200', shopType: 'restaurant' }
+    { name: 'American', image: 'https://aka.doubaocdn.com/s/5huFMhLMBJ', shopType: 'restaurant' },
+    { name: 'Italian', image: 'https://aka.doubaocdn.com/s/dbifXqeL3u', shopType: 'restaurant' },
+    { name: 'Sushi', image: 'https://aka.doubaocdn.com/s/UaJA2EETBF', shopType: 'restaurant' }
   ])
 
   // 示例餐厅（纽约坐标）
@@ -63,8 +63,8 @@ async function seed() {
     {
       name: 'Blue Burrito',
       orderPrefix: 'BB',
-      image: 'https://placehold.co/400',
-      logo: 'https://placehold.co/120',
+      image: 'https://aka.doubaocdn.com/s/sczVP0YJyU',
+      logo: 'https://aka.doubaocdn.com/s/ofXlpAV9w1',
       address: '123 Main St, New York',
       location: { type: 'Point', coordinates: [-74.006, 40.7128] },
       deliveryTime: 25,
@@ -93,14 +93,14 @@ async function seed() {
           foods: [
             {
               title: 'Classic Chicken Burrito',
-              image: 'https://placehold.co/300',
+              image: 'https://aka.doubaocdn.com/s/sczVP0YJyU',
               description: 'Grilled chicken, rice, beans, cheese, salsa',
               variations: [{ title: 'Regular', price: 11.99, discounted: 0 }],
               subCategory: 'Main'
             },
             {
               title: 'Veggie Burrito',
-              image: 'https://placehold.co/300',
+              image: 'https://aka.doubaocdn.com/s/ofXlpAV9w1',
               description: 'Black beans, rice, avocado, pico de gallo',
               variations: [{ title: 'Regular', price: 10.49, discounted: 9.99 }],
               subCategory: 'Main'
@@ -112,7 +112,7 @@ async function seed() {
           foods: [
             {
               title: 'Street Tacos (3)',
-              image: 'https://placehold.co/300',
+              image: 'https://aka.doubaocdn.com/s/5O9XZViUPU',
               description: 'Three corn tortillas with choice of meat',
               variations: [{ title: 'Standard', price: 8.99, discounted: 0 }],
               subCategory: 'Main'
@@ -126,8 +126,8 @@ async function seed() {
     {
       name: 'Pasta Palace',
       orderPrefix: 'PP',
-      image: 'https://placehold.co/400',
-      logo: 'https://placehold.co/120',
+      image: 'https://aka.doubaocdn.com/s/e3c0wPgOrG',
+      logo: 'https://aka.doubaocdn.com/s/dbifXqeL3u',
       address: '456 Broadway, New York',
       location: { type: 'Point', coordinates: [-73.98, 40.759] },
       deliveryTime: 35,
@@ -156,14 +156,14 @@ async function seed() {
           foods: [
             {
               title: 'Spaghetti Carbonara',
-              image: 'https://placehold.co/300',
+              image: 'https://aka.doubaocdn.com/s/vX39KWmg4P',
               description: 'Pancetta, egg, parmesan, black pepper',
               variations: [{ title: 'Regular', price: 15.99, discounted: 0 }],
               subCategory: 'Main'
             },
             {
               title: 'Fettuccine Alfredo',
-              image: 'https://placehold.co/300',
+              image: 'https://aka.doubaocdn.com/s/e3c0wPgOrG',
               description: 'Creamy alfredo sauce with parmesan',
               variations: [{ title: 'Regular', price: 14.49, discounted: 12.99 }],
               subCategory: 'Main'
