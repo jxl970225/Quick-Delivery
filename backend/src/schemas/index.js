@@ -37,7 +37,7 @@ const typeDefs = `#graphql
     sendOtpToPhoneNumber(phone: String!): OTPResult
     verifyOtp(otp: String!, email: String, phone: String): OTPResult
     updateUser(updateUserInput: UpdateUserInput!): User
-    placeOrder(restaurant: String!, orderInput: [OrderInput!]!, paymentMethod: String!, couponCode: String, tipping: Float!, taxationAmount: Float!, address: AddressInput!, orderDate: String!, isPickedUp: Boolean!, deliveryCharges: Float!, instructions: String): Order
+    placeOrder(restaurant: String!, orderInput: [OrderInput!]!, paymentMethod: String!, couponCode: String, tipping: Float, taxationAmount: Float, address: AddressInput!, orderDate: String!, isPickedUp: Boolean, deliveryCharges: Float, instructions: String): Order
     coupon(coupon: String!, restaurantId: ID!): CouponResult
     abortOrder(id: String!): Order
     createAddress(addressInput: AddressInput!): User
