@@ -68,6 +68,7 @@ const restaurantSchema = new mongoose.Schema(
       coordinates: { type: [Number], default: [0, 0] } // [lng, lat]
     },
     deliveryTime: { type: Number, default: 30 },
+    deliveryCharges: { type: Number, default: null },
     minimumOrder: { type: Number, default: 0 },
     tax: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },

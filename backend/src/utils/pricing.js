@@ -1,5 +1,6 @@
 const Restaurant = require('../models/Restaurant')
 const Zone = require('../models/Zone')
+const Configuration = require('../models/Configuration')
 
 const round2 = (n) => Math.round(((Number(n) || 0) + Number.EPSILON) * 100) / 100
 
@@ -94,10 +95,19 @@ async function priceOrder({
 
   if (!pricedItems.length) throw new Error('Cart is empty')
 
-  // 配送费：服务端以餐厅配置为准，仅在自取时为 0
-  const restaurantDelivery = Number(restaurant.deliveryCharges) || 0
-  // 客户端传入的配送费不参与计算，避免被改成 0 或负数
-  const deliveryCharges = pickup ? 0 : round2(restaurantDelivery)
+  const minOrder = Number(restaurant.minimumOrder) || 0
+  if (minOrder > 0 && subtotal < minOrder) {
+    throw new Error(`Minimum order of $${minOrder} required for this restaurant`)
+  }
+
+  // 配送费：餐厅自己的配置优先，没有则用平台配置；自取为 0。
+  // 客户端传入的配送费不参与计算，避免被改成 0 或负数。
+  let restaurantDelivery = restaurant.deliveryCharges
+  if (restaurantDelivery === null || restaurantDelivery === undefined) {
+    const cfg = await Configuration.findOne().catch(() => null)
+    restaurantDelivery = Number(cfg && cfg.deliveryRate) || 0
+  }
+  const deliveryCharges = pickup ? 0 : round2(Number(restaurantDelivery) || 0)
 
   // 税：取配送地址附近（50km 内）的生效区域税率
   let taxationAmount = 0
