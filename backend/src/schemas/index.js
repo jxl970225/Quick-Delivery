@@ -13,6 +13,12 @@ const typeDefs = `#graphql
     order(id: String): Order
     getUsersActiveOrders(page: Int, limit: Int, offset: Int): [Order]
     getUsersPastOrders(page: Int, limit: Int, offset: Int): [Order]
+    restaurantOrders(restaurantId: ID!, status: String): [Order]
+    pendingRestaurantOrders(restaurantId: ID!): [Order]
+    riderOrders(riderId: ID!): [Order]
+    availableDeliveryOrders(latitude: Float, longitude: Float): [Order]
+    riderProfile(riderId: ID!): Rider
+    orderStatuses: [String]
     taxes: [Tax]
     tips: [Tip]
     userFavourite(latitude: Float, longitude: Float): [Restaurant]
@@ -46,6 +52,18 @@ const typeDefs = `#graphql
     pushToken(token: String): User
     updateNotificationStatus(offerNotification: Boolean!, orderNotification: Boolean!): User
     Deactivate(isActive: Boolean!, email: String!): DeactivateResult
+    acceptOrder(id: ID!, restaurantId: ID!, preparationTime: Int): Order
+    rejectOrder(id: ID!, restaurantId: ID!, reason: String): Order
+    markOrderPreparing(id: ID!, restaurantId: ID!): Order
+    markOrderReady(id: ID!, restaurantId: ID!): Order
+    createRider(name: String!, phone: String!, email: String): Rider
+    assignRider(orderId: ID!, riderId: ID!): Order
+    autoAssignRider(orderId: ID!): Order
+    riderPickUp(id: ID!, riderId: ID!): Order
+    riderDeliver(id: ID!, riderId: ID!): Order
+    updateRiderLocation(riderId: ID!, latitude: Float!, longitude: Float!, isAvailable: Boolean): Rider
+    markOrderPaid(id: ID!, transactionId: String): Order
+    refundOrder(id: ID!, amount: Float, reason: String): Order
   }
 
   type Configuration {
@@ -362,6 +380,17 @@ const typeDefs = `#graphql
     deliveredAt: String
     cancelledAt: String
     assignedAt: String
+    refundAmount: Float
+    refundedAt: String
+    refundReason: String
+    statusHistory: [StatusEvent]
+  }
+
+  type StatusEvent {
+    status: String
+    at: String
+    by: String
+    note: String
   }
 
   type OrderItem {
@@ -379,6 +408,11 @@ const typeDefs = `#graphql
     _id: ID
     name: String
     phone: String
+    email: String
+    isActive: Boolean
+    isAvailable: Boolean
+    location: Coordinates
+    lastLocationAt: String
   }
 
   type CouponResult {

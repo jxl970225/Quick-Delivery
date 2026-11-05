@@ -1,5 +1,6 @@
 require('dotenv').config()
 const http = require('http')
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const { ApolloServer } = require('@apollo/server')
@@ -26,6 +27,9 @@ async function startServer() {
 
   app.use(cors())
   app.use(express.json())
+  // 商家接单台 / 骑手配送台（轻量 Web 操作端）
+  app.use(express.static(path.join(__dirname, '..', 'public')))
+  app.get('/', (req, res) => res.redirect('/merchant.html'))
   app.use(
     '/graphql',
     expressMiddleware(server, {

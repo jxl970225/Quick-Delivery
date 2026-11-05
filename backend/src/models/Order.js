@@ -65,7 +65,18 @@ const orderSchema = new mongoose.Schema(
     cancelledAt: Date,
     assignedAt: Date,
     completionTime: Date,
-    preparationTime: Date
+    preparationTime: Date,
+    refundAmount: { type: Number, default: 0 },
+    refundedAt: Date,
+    refundReason: String,
+    statusHistory: [
+      {
+        status: String,
+        at: { type: Date, default: Date.now },
+        by: String,
+        note: String
+      }
+    ]
   },
   { timestamps: true }
 )
