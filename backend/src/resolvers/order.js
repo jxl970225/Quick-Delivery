@@ -1,5 +1,6 @@
 const Order = require('../models/Order')
 const Coupon = require('../models/Coupon')
+const Restaurant = require('../models/Restaurant')
 const Rider = require('../models/Rider')
 const { getUserFromContext } = require('../utils/auth')
 const { priceOrder, round2 } = require('../utils/pricing')
@@ -153,9 +154,14 @@ const orderResolvers = {
         instructions
       } = args
 
-      if (!address || !address.coordinates || address.coordinates.length !== 2) {
-        throw new Error('A valid delivery address is required')
-      }
+      if (!address) throw new Error('A delivery address is required')
+
+      // 前端 Web 版可能拿不到浏览器定位，坐标缺失时回退为餐厅坐标（税按下单门店所在区域算）
+      const restaurantDoc = await Restaurant.findById(restaurantId)
+      const coords =
+        address.coordinates && address.coordinates.length === 2
+          ? address.coordinates
+          : (restaurantDoc && restaurantDoc.location && restaurantDoc.location.coordinates) || null
 
       const { coupon, discountAmount } = await resolveCoupon(
         couponCode,
@@ -172,7 +178,7 @@ const orderResolvers = {
         tipping,
         discountAmount,
         pickup: !!isPickedUp,
-        addressCoordinates: address.coordinates
+        addressCoordinates: coords
       })
 
       // 优惠券门槛按服务端 subtotal 重新校验一次
@@ -189,7 +195,7 @@ const orderResolvers = {
           label: address.label,
           deliveryAddress: address.deliveryAddress,
           details: address.details,
-          location: { coordinates: [Number(address.coordinates[0]), Number(address.coordinates[1])] }
+          location: { coordinates: coords ? [Number(coords[0]), Number(coords[1])] : undefined }
         },
         paymentMethod,
         paymentStatus: 'PENDING',
