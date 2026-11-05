@@ -34,7 +34,8 @@
 <body>
 <header>
   <h1>商家接单台</h1>
-  <input id="restaurantId" placeholder="餐厅 ID（可从餐厅后台复制）" />
+  <input id="restaurantId" list="restaurantList" placeholder="输入或选择餐厅" />
+  <datalist id="restaurantList"></datalist>
   <button onclick="saveId()">保存并刷新</button>
 </header>
 <div class="hint">接单 → 备餐 → 出餐 → 自动派单给骑手。页面每 15 秒自动刷新。</div>
@@ -177,6 +178,13 @@ function saveId() {
 }
 
 document.getElementById('restaurantId').value = restaurantId;
+(async () => {
+  try {
+    const d = await gql(`{ nearByRestaurants(latitude:40.7128, longitude:-74.006){ restaurants{ _id name } } }`);
+    document.getElementById('restaurantList').innerHTML = (d.nearByRestaurants.restaurants || [])
+      .map(r => `<option value="${r._id}">${r.name}</option>`).join('');
+  } catch (e) {}
+})();
 load();
 setInterval(load, 15000);
 </script>
