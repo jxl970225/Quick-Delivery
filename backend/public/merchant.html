@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>商家接单台 · Quick Delivery</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; color: #1c1f23; }
+  header { background: #fff; padding: 14px 20px; display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #e6e8eb; position: sticky; top: 0; z-index: 10; }
+  header h1 { font-size: 17px; margin: 0; margin-right: auto; }
+  header input { padding: 8px 10px; border: 1px solid #dcdfe3; border-radius: 8px; font-size: 13px; width: 300px; }
+  header button { padding: 8px 14px; border-radius: 8px; border: 0; background: #1c1f23; color: #fff; font-size: 13px; cursor: pointer; }
+  .hint { padding: 10px 20px; font-size: 12px; color: #6b7280; }
+  .columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; padding: 0 20px 40px; }
+  .col-head { font-size: 13px; font-weight: 600; padding: 10px 0; color: #374151; }
+  .col-head span { display: inline-block; background: #fff; border: 1px solid #e6e8eb; border-radius: 999px; padding: 1px 8px; margin-left: 6px; font-size: 11px; color: #6b7280; }
+  .card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid #e6e8eb; font-size: 13px; }
+  .card .oid { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .card .amt { color: #059669; font-weight: 600; margin: 6px 0; }
+  .card .addr { color: #6b7280; font-size: 12px; line-height: 1.5; margin-bottom: 8px; }
+  .items { border-top: 1px dashed #e6e8eb; padding-top: 8px; margin-bottom: 10px; color: #374151; font-size: 12px; line-height: 1.7; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .actions button { flex: 1; min-width: 70px; padding: 8px 6px; font-size: 12px; border-radius: 8px; border: 0; cursor: pointer; }
+  .primary { background: #059669; color: #fff; }
+  .warn { background: #f59e0b; color: #fff; }
+  .danger { background: #ef4444; color: #fff; }
+  .muted { background: #eef0f3; color: #374151; }
+  .empty { color: #9ca3af; font-size: 12px; padding: 10px 0; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1c1f23; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 20; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>商家接单台</h1>
+  <input id="restaurantId" placeholder="餐厅 ID（可从餐厅后台复制）" />
+  <button onclick="saveId()">保存并刷新</button>
+</header>
+<div class="hint">接单 → 备餐 → 出餐 → 自动派单给骑手。页面每 15 秒自动刷新。</div>
+
+<div class="columns">
+  <div>
+    <div class="col-head">待接单 <span id="c-pending">0</span></div>
+    <div id="col-pending"></div>
+  </div>
+  <div>
+    <div class="col-head">备餐中 <span id="c-preparing">0</span></div>
+    <div id="col-preparing"></div>
+  </div>
+  <div>
+    <div class="col-head">待取餐 <span id="c-ready">0</span></div>
+    <div id="col-ready"></div>
+  </div>
+  <div>
+    <div class="col-head">配送中 <span id="c-delivery">0</span></div>
+    <div id="col-delivery"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const GQL = window.location.origin + '/graphql';
+let restaurantId = localStorage.getItem('qd_restaurant_id') || '';
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+async function gql(query, variables) {
+  const res = await fetch(GQL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables })
+  });
+  const json = await res.json();
+  if (json.errors && json.errors.length) throw new Error(json.errors[0].message);
+  return json.data;
+}
+
+const ORDER_FIELDS = `
+  _id orderId orderStatus paymentStatus paymentMethod paidAmount orderAmount
+  deliveryCharges taxationAmount tipping discountAmount
+  deliveryAddress { label deliveryAddress details }
+  items { title quantity variation { title } }
+  createdAt
+`;
+
+async function load() {
+  if (!restaurantId) {
+    document.getElementById('col-pending').innerHTML = '<div class="empty">请先填写餐厅 ID</div>';
+    return;
+  }
+  try {
+    const data = await gql(`query($r: ID!) { restaurantOrders(restaurantId: $r) { ${ORDER_FIELDS} } }`, { r: restaurantId });
+    render(data.restaurantOrders || []);
+  } catch (e) {
+    toast('加载失败：' + e.message);
+  }
+}
+
+function card(o, actions) {
+  const items = (o.items || []).map(i => `${i.quantity} × ${i.title}${i.variation && i.variation.title ? '（' + i.variation.title + '）' : ''}`).join('<br/>');
+  return `<div class="card">
+    <div class="oid">${o.orderId || o._id}</div>
+    <div class="amt">$${Number(o.paidAmount || 0).toFixed(2)}　<span style="color:#6b7280;font-weight:400">${o.paymentMethod || ''} ${o.paymentStatus || ''}</span></div>
+    <div class="items">${items}</div>
+    <div class="addr">${(o.deliveryAddress && (o.deliveryAddress.label || '')) || ''} ${(o.deliveryAddress && o.deliveryAddress.deliveryAddress) || ''}<br/>${(o.deliveryAddress && o.deliveryAddress.details) || ''}</div>
+    <div class="actions">${actions}</div>
+  </div>`;
+}
+
+function render(orders) {
+  const buckets = { PENDING: [], ACCEPTED: [], PREPARING: [], READY: [], ASSIGNED: [], PICKED: [] };
+  orders.forEach(o => { if (buckets[o.orderStatus]) buckets[o.orderStatus].push(o); });
+
+  const pending = buckets.PENDING.map(o => card(o, `
+    <button class="primary" onclick="act('acceptOrder', {id:'${o._id}', restaurantId:'${restaurantId}'})">接单</button>
+    <button class="danger" onclick="reject('${o._id}')">拒单</button>`)).join('') || '<div class="empty">暂无新订单</div>';
+
+  const preparing = buckets.ACCEPTED.map(o => card(o, `
+    <button class="warn" onclick="act('markOrderPreparing', {id:'${o._id}', restaurantId:'${restaurantId}'})">开始备餐</button>`)).join('')
+    + buckets.PREPARING.map(o => card(o, `
+    <button class="primary" onclick="act('markOrderReady', {id:'${o._id}', restaurantId:'${restaurantId}'})">出餐完成</button>`)).join('')
+    || '<div class="empty">暂无备餐订单</div>';
+
+  const ready = buckets.READY.map(o => card(o, `
+    <button class="primary" onclick="act('autoAssignRider', {orderId:'${o._id}'})">派单给骑手</button>`)).join('') || '<div class="empty">暂无待取餐订单</div>';
+
+  const delivery = buckets.ASSIGNED.concat(buckets.PICKED).map(o => card(o, `
+    <span class="empty">${o.orderStatus === 'PICKED' ? '骑手已取餐，配送中' : '已派单，等待骑手取餐'}</span>`)).join('') || '<div class="empty">暂无配送中订单</div>';
+
+  document.getElementById('col-pending').innerHTML = pending;
+  document.getElementById('col-preparing').innerHTML = preparing;
+  document.getElementById('col-ready').innerHTML = ready;
+  document.getElementById('col-delivery').innerHTML = delivery;
+  document.getElementById('c-pending').textContent = buckets.PENDING.length;
+  document.getElementById('c-preparing').textContent = buckets.ACCEPTED.length + buckets.PREPARING.length;
+  document.getElementById('c-ready').textContent = buckets.READY.length;
+  document.getElementById('c-delivery').textContent = buckets.ASSIGNED.length + buckets.PICKED.length;
+}
+
+const MUT = {
+  acceptOrder: `mutation($id: ID!, $restaurantId: ID!) { acceptOrder(id: $id, restaurantId: $restaurantId) { _id } }`,
+  rejectOrder: `mutation($id: ID!, $restaurantId: ID!, $reason: String) { rejectOrder(id: $id, restaurantId: $restaurantId, reason: $reason) { _id } }`,
+  markOrderPreparing: `mutation($id: ID!, $restaurantId: ID!) { markOrderPreparing(id: $id, restaurantId: $restaurantId) { _id } }`,
+  markOrderReady: `mutation($id: ID!, $restaurantId: ID!) { markOrderReady(id: $id, restaurantId: $restaurantId) { _id } }`,
+  autoAssignRider: `mutation($orderId: ID!) { autoAssignRider(orderId: $orderId) { _id } }`
+};
+
+async function act(name, vars) {
+  try {
+    await gql(MUT[name], vars);
+    toast('操作成功');
+    await load();
+  } catch (e) {
+    toast('失败：' + e.message);
+  }
+}
+
+function reject(id) {
+  const reason = prompt('拒单原因（可留空）') || '';
+  act('rejectOrder', { id, restaurantId, reason });
+}
+
+function saveId() {
+  const v = document.getElementById('restaurantId').value.trim();
+  if (!v) { toast('请填写餐厅 ID'); return; }
+  restaurantId = v;
+  localStorage.setItem('qd_restaurant_id', v);
+  toast('已保存');
+  load();
+}
+
+document.getElementById('restaurantId').value = restaurantId;
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>
