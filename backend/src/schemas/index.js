@@ -15,9 +15,9 @@ const typeDefs = `#graphql
     getUsersPastOrders(page: Int, limit: Int, offset: Int): [Order]
     restaurantOrders(restaurantId: ID!, status: String): [Order]
     pendingRestaurantOrders(restaurantId: ID!): [Order]
-    riderOrders(riderId: ID!): [Order]
+    riderOrders(riderId: ID): [Order]
     availableDeliveryOrders(latitude: Float, longitude: Float): [Order]
-    riderProfile(riderId: ID!): Rider
+    riderProfile(riderId: ID): Rider
     orderStatuses: [String]
     taxes: [Tax]
     tips: [Tip]
