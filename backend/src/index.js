@@ -9,6 +9,7 @@ const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/dra
 const jwt = require('jsonwebtoken')
 const connectDB = require('./config/db')
 const typeDefs = require('./schemas')
+const { registerImageRoutes } = require('./utils/images')
 const resolvers = require('./resolvers')
 
 async function startServer() {
@@ -30,21 +31,32 @@ async function startServer() {
   // 商家接单台 / 骑手配送台（轻量 Web 操作端）
   app.use(express.static(path.join(__dirname, '..', 'public')))
   app.get('/', (req, res) => res.redirect('/merchant.html'))
+  registerImageRoutes(app)
   app.use(
     '/graphql',
     expressMiddleware(server, {
       context: async ({ req }) => {
         const header = req.headers.authorization || ''
-        let userId = null
+        const ctx = { userId: null, role: null, merchantId: null, restaurantId: null, riderId: null }
         if (header.startsWith('Bearer ')) {
           try {
             const decoded = jwt.verify(header.slice(7), process.env.JWT_SECRET)
-            userId = decoded.userId
+            if (decoded.role === 'merchant' || decoded.merchantId) {
+              ctx.role = 'merchant'
+              ctx.merchantId = decoded.merchantId
+              ctx.restaurantId = decoded.restaurantId
+            } else if (decoded.role === 'rider' || decoded.riderId) {
+              ctx.role = 'rider'
+              ctx.riderId = decoded.riderId
+            } else {
+              ctx.role = 'customer'
+              ctx.userId = decoded.userId
+            }
           } catch (e) {
-            userId = null
+            // token 无效时保持未登录
           }
         }
-        return { userId }
+        return ctx
       }
     })
   )

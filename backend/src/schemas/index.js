@@ -24,6 +24,7 @@ const typeDefs = `#graphql
     userFavourite(latitude: Float, longitude: Float): [Restaurant]
     user: User
     profile: User
+    merchantMe: Merchant
     singleVendorDiscovery(previewLimit: Int, dealLimit: Int): SingleVendorDiscovery
   }
 
@@ -64,6 +65,8 @@ const typeDefs = `#graphql
     updateRiderLocation(riderId: ID!, latitude: Float!, longitude: Float!, isAvailable: Boolean): Rider
     markOrderPaid(id: ID!, transactionId: String): Order
     refundOrder(id: ID!, amount: Float, reason: String): Order
+    merchantLogin(email: String!, password: String!): AuthPayload
+    riderLogin(phone: String!, password: String!): AuthPayload
   }
 
   type Configuration {
@@ -402,6 +405,14 @@ const typeDefs = `#graphql
     quantity: Int
     variation: Variation
     addons: [Addon]
+  }
+
+  type Merchant {
+    _id: ID
+    name: String
+    email: String
+    restaurant: Restaurant
+    isActive: Boolean
   }
 
   type Rider {

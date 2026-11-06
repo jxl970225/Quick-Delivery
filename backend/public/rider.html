@@ -7,10 +7,11 @@
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; color: #1c1f23; }
-  header { background: #fff; padding: 14px 20px; display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #e6e8eb; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
+  header { background: #fff; padding: 14px 20px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #e6e8eb; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
   header h1 { font-size: 17px; margin: 0; margin-right: auto; }
-  header input { padding: 8px 10px; border: 1px solid #dcdfe3; border-radius: 8px; font-size: 13px; width: 320px; }
+  header input { padding: 8px 10px; border: 1px solid #dcdfe3; border-radius: 8px; font-size: 13px; width: 190px; }
   header button { padding: 8px 14px; border-radius: 8px; border: 0; background: #1c1f23; color: #fff; font-size: 13px; cursor: pointer; }
+  .rider-name { font-size: 13px; color: #059669; font-weight: 600; }
   .hint { padding: 10px 20px; font-size: 12px; color: #6b7280; }
   .list { padding: 0 20px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
   .card { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid #e6e8eb; font-size: 13px; }
@@ -31,17 +32,26 @@
 <body>
 <header>
   <h1>骑手配送台</h1>
-  <input id="riderId" placeholder="骑手 ID（由商家/平台创建）" />
-  <button onclick="saveId()">保存并刷新</button>
-  <button onclick="reportLocation()" style="background:#059669">上报我的位置</button>
+  <div id="loginBox" style="display:flex;gap:8px;align-items:center">
+    <input id="phone" placeholder="骑手手机号，如 +15550001111" />
+    <input id="password" type="password" placeholder="密码" />
+    <button onclick="doLogin()">登录</button>
+  </div>
+  <div id="riderBox" style="display:none;gap:10px;align-items:center">
+    <span class="rider-name" id="riderName"></span>
+    <button onclick="reportLocation()" style="background:#059669">上报位置</button>
+    <button onclick="logout()" style="background:#eef0f3;color:#374151">退出</button>
+  </div>
 </header>
-<div class="hint">取餐 → 送达。页面每 15 秒自动刷新；上报位置需要浏览器定位权限。</div>
-<div id="list" class="list"><div class="empty">请先填写骑手 ID</div></div>
+<div class="hint" id="hint">登录后查看分配给你的订单。页面每 15 秒自动刷新。</div>
+<div id="list" class="list"><div class="empty">请先登录</div></div>
 <div class="toast" id="toast"></div>
 
 <script>
 const GQL = window.location.origin + '/graphql';
-let riderId = localStorage.getItem('qd_rider_id') || '';
+let riderId = '';
+
+function token() { return localStorage.getItem('qd_rider_token') || ''; }
 
 function toast(msg) {
   const el = document.getElementById('toast');
@@ -52,14 +62,60 @@ function toast(msg) {
 }
 
 async function gql(query, variables) {
-  const res = await fetch(GQL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables })
-  });
+  const headers = { 'Content-Type': 'application/json' };
+  if (token()) headers['Authorization'] = 'Bearer ' + token();
+  const res = await fetch(GQL, { method: 'POST', headers, body: JSON.stringify({ query, variables }) });
   const json = await res.json();
   if (json.errors && json.errors.length) throw new Error(json.errors[0].message);
   return json.data;
+}
+
+async function doLogin() {
+  const phone = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value;
+  if (!phone || !password) { toast('请输入手机号和密码'); return; }
+  try {
+    const d = await gql(`mutation($p:String!,$pw:String!){ riderLogin(phone:$p,password:$pw){ token userId name } }`, { p: phone, pw: password });
+    localStorage.setItem('qd_rider_token', d.riderLogin.token);
+    riderId = d.riderLogin.userId;
+    toast('登录成功');
+    await boot();
+  } catch (e) {
+    toast('登录失败：' + e.message);
+  }
+}
+
+function logout() {
+  localStorage.removeItem('qd_rider_token');
+  riderId = '';
+  document.getElementById('loginBox').style.display = 'flex';
+  document.getElementById('riderBox').style.display = 'none';
+  document.getElementById('list').innerHTML = '<div class="empty">请先登录</div>';
+  document.getElementById('hint').textContent = '登录后查看分配给你的订单。';
+}
+
+async function boot() {
+  if (!token()) {
+    document.getElementById('loginBox').style.display = 'flex';
+    document.getElementById('riderBox').style.display = 'none';
+    return;
+  }
+  try {
+    const d = await gql(`{ riderProfile { _id name phone isAvailable } }`);
+    const me = d.riderProfile;
+    if (!me) throw new Error('骑手账号无效');
+    riderId = me._id;
+    document.getElementById('riderName').textContent = me.name;
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('riderBox').style.display = 'flex';
+    document.getElementById('hint').textContent = `${me.name}　取餐 → 送达。每 15 秒自动刷新；上报位置需要浏览器定位权限。`;
+    await load();
+  } catch (e) {
+    localStorage.removeItem('qd_rider_token');
+    document.getElementById('loginBox').style.display = 'flex';
+    document.getElementById('riderBox').style.display = 'none';
+    toast('需要重新登录：' + e.message);
+  }
 }
 
 async function load() {
@@ -89,7 +145,6 @@ function render(orders) {
     const items = (o.items || []).map(i => `${i.quantity} × ${i.title}`).join('，');
     return `<div class="card">
       <div class="oid">${o.orderId || o._id}<span class="badge ${picked ? 'picked' : ''}">${picked ? '配送中' : '待取餐'}</span></div>
-      <div class="row"><span class="label">取餐</span>餐厅 ${o.restaurant && o.restaurant.name ? o.restaurant.name : ''}</div>
       <div class="row"><span class="label">送达</span>${(o.deliveryAddress && o.deliveryAddress.deliveryAddress) || ''}<br/>${(o.deliveryAddress && o.deliveryAddress.details) || ''}</div>
       <div class="row"><span class="label">菜品</span>${items}</div>
       <div class="row"><span class="label">收款</span>$${Number(o.paidAmount || 0).toFixed(2)}（${o.paymentMethod || ''}）</div>
@@ -113,7 +168,7 @@ async function act(name, id) {
 }
 
 function reportLocation() {
-  if (!riderId) { toast('请先填写骑手 ID'); return; }
+  if (!riderId) { toast('请先登录'); return; }
   if (!navigator.geolocation) { toast('浏览器不支持定位'); return; }
   navigator.geolocation.getCurrentPosition(async (pos) => {
     try {
@@ -127,18 +182,8 @@ function reportLocation() {
   }, (err) => toast('定位失败：' + err.message), { enableHighAccuracy: true, timeout: 10000 });
 }
 
-function saveId() {
-  const v = document.getElementById('riderId').value.trim();
-  if (!v) { toast('请填写骑手 ID'); return; }
-  riderId = v;
-  localStorage.setItem('qd_rider_id', v);
-  toast('已保存');
-  load();
-}
-
-document.getElementById('riderId').value = riderId;
-load();
-setInterval(load, 15000);
+boot();
+setInterval(() => { if (riderId) load(); }, 15000);
 </script>
 </body>
 </html>

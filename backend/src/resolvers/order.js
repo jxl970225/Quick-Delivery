@@ -2,7 +2,7 @@ const Order = require('../models/Order')
 const Coupon = require('../models/Coupon')
 const Restaurant = require('../models/Restaurant')
 const Rider = require('../models/Rider')
-const { getUserFromContext } = require('../utils/auth')
+const { getUserFromContext, getMerchantRestaurant, getRiderId } = require('../utils/auth')
 const { priceOrder, round2 } = require('../utils/pricing')
 
 function generateOrderId() {
@@ -111,20 +111,23 @@ const orderResolvers = {
     },
 
     // ===== 商家端 =====
-    restaurantOrders: async (_, { restaurantId, status }) => {
-      const query = { restaurant: restaurantId }
+    restaurantOrders: async (_, { restaurantId, status }, context) => {
+      const storeId = getMerchantRestaurant(context, restaurantId)
+      const query = { restaurant: storeId }
       if (status) query.orderStatus = status
       return Order.find(query).sort({ createdAt: 1 })
     },
 
-    pendingRestaurantOrders: async (_, { restaurantId }) => {
-      return Order.find({ restaurant: restaurantId, orderStatus: 'PENDING' }).sort({ createdAt: 1 })
+    pendingRestaurantOrders: async (_, { restaurantId }, context) => {
+      const storeId = getMerchantRestaurant(context, restaurantId)
+      return Order.find({ restaurant: storeId, orderStatus: 'PENDING' }).sort({ createdAt: 1 })
     },
 
     // ===== 骑手端 =====
-    riderOrders: async (_, { riderId }) => {
+    riderOrders: async (_, { riderId }, context) => {
+      const rid = getRiderId(context, riderId)
       const active = ['ASSIGNED', 'PICKED']
-      return Order.find({ rider: riderId, orderStatus: { $in: active } }).sort({ createdAt: 1 })
+      return Order.find({ rider: rid, orderStatus: { $in: active } }).sort({ createdAt: 1 })
     },
 
     availableDeliveryOrders: async (_, { latitude, longitude }) => {
@@ -132,7 +135,10 @@ const orderResolvers = {
       return Order.find({ orderStatus: 'READY' }).sort({ createdAt: 1 }).limit(50)
     },
 
-    riderProfile: async (_, { riderId }) => Rider.findById(riderId),
+    riderProfile: async (_, { riderId }, context) => {
+      const rid = getRiderId(context, riderId)
+      return Rider.findById(rid)
+    },
 
     orderStatuses: () => orderStatuses()
   },
@@ -246,28 +252,28 @@ const orderResolvers = {
     },
 
     // ===== 商家操作 =====
-    acceptOrder: async (_, { id, restaurantId, preparationTime }) => {
+    acceptOrder: async (_, { id, restaurantId, preparationTime }, context) => {
       const order = await loadOrder(id)
-      assertRestaurant(order, restaurantId)
+      assertRestaurant(order, getMerchantRestaurant(context, restaurantId))
       if (preparationTime) order.expectedTime = String(preparationTime)
       return applyStatus(order, 'ACCEPTED', 'merchant', 'Accepted by merchant')
     },
 
-    rejectOrder: async (_, { id, restaurantId, reason }) => {
+    rejectOrder: async (_, { id, restaurantId, reason }, context) => {
       const order = await loadOrder(id)
-      assertRestaurant(order, restaurantId)
+      assertRestaurant(order, getMerchantRestaurant(context, restaurantId))
       return applyStatus(order, 'REJECTED', 'merchant', reason || 'Rejected by merchant')
     },
 
-    markOrderPreparing: async (_, { id, restaurantId }) => {
+    markOrderPreparing: async (_, { id, restaurantId }, context) => {
       const order = await loadOrder(id)
-      assertRestaurant(order, restaurantId)
+      assertRestaurant(order, getMerchantRestaurant(context, restaurantId))
       return applyStatus(order, 'PREPARING', 'merchant', 'Preparing')
     },
 
-    markOrderReady: async (_, { id, restaurantId }) => {
+    markOrderReady: async (_, { id, restaurantId }, context) => {
       const order = await loadOrder(id)
-      assertRestaurant(order, restaurantId)
+      assertRestaurant(order, getMerchantRestaurant(context, restaurantId))
       return applyStatus(order, 'READY', 'merchant', 'Ready for pickup')
     },
 
@@ -308,23 +314,26 @@ const orderResolvers = {
       return order
     },
 
-    riderPickUp: async (_, { id, riderId }) => {
+    riderPickUp: async (_, { id, riderId }, context) => {
       const order = await loadOrder(id)
-      if (String(order.rider) !== String(riderId)) throw new Error('This order is not assigned to you')
+      const rid = getRiderId(context, riderId)
+      if (String(order.rider) !== String(rid)) throw new Error('This order is not assigned to you')
       return applyStatus(order, 'PICKED', 'rider', 'Picked up from restaurant')
     },
 
-    riderDeliver: async (_, { id, riderId }) => {
+    riderDeliver: async (_, { id, riderId }, context) => {
       const order = await loadOrder(id)
-      if (String(order.rider) !== String(riderId)) throw new Error('This order is not assigned to you')
+      const rid = getRiderId(context, riderId)
+      if (String(order.rider) !== String(rid)) throw new Error('This order is not assigned to you')
       const updated = await applyStatus(order, 'COMPLETED', 'rider', 'Delivered')
       if (updated.paymentMethod === 'COD') updated.paymentStatus = 'PAID'
       await updated.save()
       return updated
     },
 
-    updateRiderLocation: async (_, { riderId, latitude, longitude, isAvailable }) => {
-      const rider = await Rider.findById(riderId)
+    updateRiderLocation: async (_, { riderId, latitude, longitude, isAvailable }, context) => {
+      const rid = getRiderId(context, riderId)
+      const rider = await Rider.findById(rid)
       if (!rider) throw new Error('Rider not found')
       rider.location = { type: 'Point', coordinates: [Number(longitude), Number(latitude)] }
       rider.lastLocationAt = new Date()
