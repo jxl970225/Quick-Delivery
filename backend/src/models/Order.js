@@ -47,6 +47,7 @@ const orderSchema = new mongoose.Schema(
     review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review' },
     paymentMethod: { type: String, default: 'CARD' },
     paymentStatus: { type: String, default: 'PENDING' },
+    paymentIntentId: String,
     paidAmount: { type: Number, default: 0 },
     orderAmount: { type: Number, default: 0 },
     orderStatus: { type: String, default: 'PENDING' },

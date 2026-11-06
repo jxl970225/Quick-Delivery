@@ -3,6 +3,7 @@ const configResolvers = require('./config')
 const restaurantResolvers = require('./restaurant')
 const orderResolvers = require('./order')
 const authResolvers = require('./auth')
+const { paymentResolvers } = require('./payments')
 
 const resolvers = {
   Query: {
@@ -17,7 +18,8 @@ const resolvers = {
     ...configResolvers.Mutation,
     ...restaurantResolvers.Mutation,
     ...orderResolvers.Mutation,
-    ...authResolvers.Mutation
+    ...authResolvers.Mutation,
+    ...paymentResolvers.Mutation
   },
   Restaurant: {
     ...restaurantResolvers.Restaurant

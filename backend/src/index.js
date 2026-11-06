@@ -10,12 +10,14 @@ const jwt = require('jsonwebtoken')
 const connectDB = require('./config/db')
 const typeDefs = require('./schemas')
 const { registerImageRoutes } = require('./utils/images')
+const { registerPaymentRoutes } = require('./resolvers/payments')
 const resolvers = require('./resolvers')
 
 async function startServer() {
   await connectDB()
 
   const app = express()
+  app.set('trust proxy', true)
   const httpServer = http.createServer(app)
 
   const server = new ApolloServer({
@@ -27,6 +29,8 @@ async function startServer() {
   await server.start()
 
   app.use(cors())
+  // Stripe webhook 需要原始 body，必须挂在 json 解析之前
+  registerPaymentRoutes(app)
   app.use(express.json())
   // 商家接单台 / 骑手配送台（轻量 Web 操作端）
   app.use(express.static(path.join(__dirname, '..', 'public')))

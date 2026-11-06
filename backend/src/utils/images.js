@@ -37,7 +37,8 @@ function registerImageRoutes(app) {
       if (!req.file) return res.status(400).json({ error: 'No file uploaded (field name must be "file")' })
       try {
         const id = await saveToGridFS(req.file)
-        const base = `${req.protocol}://${req.get('host')}`
+        const proto = req.headers['x-forwarded-proto'] || req.protocol
+        const base = `${proto}://${req.get('host')}`
         res.json({
           _id: id.toString(),
           url: `${base}/images/${id}`,

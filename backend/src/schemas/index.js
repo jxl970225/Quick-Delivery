@@ -67,6 +67,7 @@ const typeDefs = `#graphql
     refundOrder(id: ID!, amount: Float, reason: String): Order
     merchantLogin(email: String!, password: String!): AuthPayload
     riderLogin(phone: String!, password: String!): AuthPayload
+    createPaymentIntent(orderId: ID!): PaymentIntentPayload
   }
 
   type Configuration {
@@ -405,6 +406,14 @@ const typeDefs = `#graphql
     quantity: Int
     variation: Variation
     addons: [Addon]
+  }
+
+  type PaymentIntentPayload {
+    clientSecret: String
+    paymentIntentId: String
+    amount: Float
+    currency: String
+    publishableKey: String
   }
 
   type Merchant {
